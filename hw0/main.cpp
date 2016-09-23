@@ -3,11 +3,11 @@
 #include <string>
 #include <cmath>
 
-using namespace std;
-
 void print();
 bool backtrack(int r, int c);
-int validate(int r, int c, int d);
+bool validate(int r, int c, int d);
+
+using namespace std;
 
 int S[25][25];
 int length = 0;
@@ -28,8 +28,6 @@ int main(void)
         ss.str("");
         ss.clear();
     }
-
-    // cout << "Length: " << length << endl;
 
     // Sweet Backtracking
     if (backtrack(0, 0) == true) 
@@ -52,7 +50,6 @@ bool backtrack(int r, int c)
         r++;
     }
 
-
     // Check if the cell has default numver
     if (S[r][c] != 0) {
         return backtrack(r, c+1);
@@ -60,14 +57,9 @@ bool backtrack(int r, int c)
     else {
         // Iterate all possible number
         for (int d = 1; d <= length; ++d) {
-            // cout << "----------" << endl;
-            // cout << "(" << r << " " << c << ")" << endl;
-            // print();
 
             // Validate number
-            int res = validate(r, c, d);
-            if (res == 0) {
-                // cout << "assign " << d << endl;
+            if (validate(r, c, d)) {
 
                 S[r][c] = d;
                 if (backtrack(r, c+1)) {
@@ -75,9 +67,6 @@ bool backtrack(int r, int c)
                 }
                 S[r][c] = 0;
             }
-            // else {
-                // cout << "val fail " << res << " with num " << d << endl;
-            // }
         }
 
         // No solution found
@@ -85,44 +74,42 @@ bool backtrack(int r, int c)
     }
 }
 
-int validate(int r, int c, int d)
+bool validate(int r, int c, int d)
 {
     // Check row and col
     for (int i = 0; i < length; ++i) {
         if ((S[r][i] == d) || (S[i][c] == d)) { 
-            // cout << "ri " << S[r][i] << endl;
-            // cout << "ic " << S[i][c] << endl;
-            // cout << d << endl;
-            return 1; 
+            return false; 
         }
     }
 
     // Check square
-    int box_r = floor(r/3);
-    int box_c = floor(c/3);
     int size = sqrt(length);
-    
-    for (int i = 0; i < size; ++i) {
-        for (int j = 0; j < size; ++j) {
-            if (S[box_r*size+i][box_c*size+j] == d) {
-                // cout << box_r << endl;
-                // cout << box_c << endl;
-                // cout << size << endl;
-                return 2;
+    int box_r = floor(r/3) * size;
+    int box_c = floor(c/3) * size;
+
+    for (int r = 0; r < size; ++r) {
+        for (int c = 0; c < size; ++c) {
+            if (S[box_r+r][box_c+c] == d) {
+                return false;
             }
-        } 
+        }
     }
 
-    return 0; 
+    return true; 
 }
 
 void print()
 {
     for (int i = 0; i < length; ++i) {
         for (int j = 0; j < length; ++j) {
-            cout << S[i][j] << " ";
+            cout << S[i][j];
+            if (j == length-1) 
+                cout << endl;
+            else 
+                cout << " ";
+            
         } 
-        cout << endl;
     }
 }
 
