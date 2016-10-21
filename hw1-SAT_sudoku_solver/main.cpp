@@ -13,8 +13,8 @@ void output_sat();
 void output_puz();
 void make_cls(string opt, int idx, int num);
 int get_num_pos(string opt, int idx, int num);
-int get_rcn_code(int r, int c, int n);
-
+int get_rcn_encode(int r, int c, int n);
+int* get_rcn_decode(int code);
 
 int N = 0, n = 0;
 int cls_idx = 0;
@@ -36,9 +36,7 @@ int main(int argc, char* argv[])
 
     // Open files
     unsol_puz.open(argv[1], ios::in);
-    sol_puz.open(argv[2], ios::out);
     unsol_sat.open(unsol_sat_filename, ios::out);
-    sol_sat.open(sol_sat_filename, ios::in);
     
     // Calculate length
     while (getline(unsol_puz, lines[N])) N++;
@@ -58,71 +56,71 @@ int main(int argc, char* argv[])
     for (int r = 0; r < N; r++) {
         for (int c = 0; c < N; c++) {
             if (G[r][c] != 0) {
-                cout << r << " " << c << " " << G[r][c] << " " << get_rcn_code(r, c, G[r][c]) << endl;
-                // cls[cls_idx++] = to_string(get_rcn_code(r, c, G[r][c]));
+                cls[cls_idx++] = to_string(r) + to_string(c) + to_string(G[r][c]) + " 0";
             }
         }
     }
 
     // Generate row cls
-    // for (int r = 0; r < N; r++) {
-        // for (int num = 1; num <= N; num++) {
-            // int num_pos = get_num_pos("ROW", r, num);
+    for (int r = 0; r < N; r++) {
+        for (int num = 1; num <= N; num++) {
+            int num_pos = get_num_pos("ROW", r, num);
 
-            // if (num_pos == -1) {
-                // make_cls("ROW", r, num);
+            if (num_pos == -1) {
+                make_cls("ROW", r, num);
                  
-            // }
-        // }
-    // }
+            }
+        }
+    }
 
     // Generate col cls
-    // for (int c = 0; c < N; c++) {
-        // for (int num = 1; num <= N; num++) {
-            // int num_pos = get_num_pos("COL", c, num);
+    for (int c = 0; c < N; c++) {
+        for (int num = 1; num <= N; num++) {
+            int num_pos = get_num_pos("COL", c, num);
 
-            // if (num_pos == -1) {
-                // make_cls("COL", c, num);
+            if (num_pos == -1) {
+                make_cls("COL", c, num);
 
-            // } 
-        // }
-    // }
-
-    // One cell for one num
-    // for (int r = 0; r < N; r++) {
-        // for (int c = 0; c < N; c++) {
-
-            // if (G[r][c] == 0) {
-                // // At least one
-                // // for (int num = 1; num <= N; num++) {
-                    // // cls[cls_idx] += to_string(r+1) + to_string(c+1) + to_string(num) + " ";
-                // // }
-
-                // // cls[cls_idx++] += "0";
-
-                // // At most one
-                // for (int i = 1; i <= N; i++) {
-                    // for (int j = i+1; j <= N; j++) {
-                        // cls[cls_idx] += "-" + to_string(r+1) + to_string(c+1) + to_string(i) + " ";        
-                        // cls[cls_idx] += "-" + to_string(r+1) + to_string(c+1) + to_string(j) + " ";        
-                        // cls[cls_idx++] += "0";
-                    // }
-                // } 
-            // }
-
-        // }
-    // }
+            } 
+        }
+    }
 
     // Generate bloc cls
-    // for (int b = 0; b < N; b++) {
-        // for (int num = 1; num <= N; num++) {
-            // int num_pos = get_num_pos("BLOC", b, num);
+    for (int b = 0; b < N; b++) {
+        for (int num = 1; num <= N; num++) {
+            int num_pos = get_num_pos("BLOC", b, num);
 
-            // if (num_pos == -1) {
-                // make_cls("BLOC", b, num);
-            // } 
-        // }
-    // }
+            if (num_pos == -1) {
+                make_cls("BLOC", b, num);
+            } 
+        }
+    }
+
+    // One cell for one num
+    for (int r = 0; r < N; r++) {
+        for (int c = 0; c < N; c++) {
+
+            if (G[r][c] == 0) {
+                // At least one
+                // for (int num = 1; num <= N; num++) {
+                    // cls[cls_idx] += to_string(r+1) + to_string(c+1) + to_string(num) + " ";
+                // }
+
+                // cls[cls_idx++] += "0";
+
+                // At most one
+                for (int i = 1; i <= N; i++) {
+                    for (int j = i+1; j <= N; j++) {
+                        cls[cls_idx] += "-" + to_string(r) + to_string(c) + to_string(i) + " ";        
+                        cls[cls_idx] += "-" + to_string(r) + to_string(c) + to_string(j) + " ";        
+                        cls[cls_idx++] += "0";
+                    }
+                } 
+            }
+
+        }
+    }
+
 
 
     output_sat();
@@ -130,10 +128,14 @@ int main(int argc, char* argv[])
     unsol_puz.close();
 
     // Call minisat solver
-    // system("./minisat unsol_sat sol_sat");
+    system("./minisat unsol_sat sol_sat");
     // execlp("./minisat", unsol_sat_filename, sol_sat_filename, NULL);
     // exec
     
+
+    sol_sat.open(sol_sat_filename, ios::in);
+    sol_puz.open(argv[2], ios::out);
+
     // Decode from CNF 
     int val;
     string res;
@@ -158,7 +160,7 @@ void make_cls(string opt, int idx, int num)
         // At least one 
         for (int i = 0; i < N; i++) {
             if (G[idx][i] == 0) {
-                cls[cls_idx] += to_string(idx+1) + to_string(i+1) + to_string(num) + " "; 
+                cls[cls_idx] += to_string(idx) + to_string(i) + to_string(num) + " "; 
             }
         } 
 
@@ -168,8 +170,8 @@ void make_cls(string opt, int idx, int num)
         for (int i = 0; i < N; i++) {
             for (int j = i+1; j < N; j++) {
                 if (G[idx][i] == 0 && G[idx][j] == 0) {
-                    cls[cls_idx] += "-" + to_string(idx+1) + to_string(i+1) + to_string(num) + " ";
-                    cls[cls_idx] += "-" + to_string(idx+1) + to_string(j+1) + to_string(num) + " ";
+                    cls[cls_idx] += "-" + to_string(idx) + to_string(i) + to_string(num) + " ";
+                    cls[cls_idx] += "-" + to_string(idx) + to_string(j) + to_string(num) + " ";
                     cls[cls_idx++] += "0";
                 }
            }
@@ -180,7 +182,7 @@ void make_cls(string opt, int idx, int num)
         // At least one 
         for (int i = 0; i < N; i++) {
             if (G[i][idx] == 0) {
-                cls[cls_idx] += to_string(i+1) + to_string(idx+1) + to_string(num) + " "; 
+                cls[cls_idx] += to_string(i) + to_string(idx) + to_string(num) + " "; 
             }
         } 
 
@@ -190,8 +192,8 @@ void make_cls(string opt, int idx, int num)
         for (int i = 0; i < N; i++) {
             for (int j = i+1; j < N; j++) {
                 if (G[i][idx] == 0 && G[j][idx] == 0) {
-                    cls[cls_idx] += "-" + to_string(i+1) + to_string(idx+1) + to_string(num) + " ";
-                    cls[cls_idx] += "-" + to_string(j+1) + to_string(idx+1) + to_string(num) + " ";
+                    cls[cls_idx] += "-" + to_string(i) + to_string(idx) + to_string(num) + " ";
+                    cls[cls_idx] += "-" + to_string(j) + to_string(idx) + to_string(num) + " ";
                     cls[cls_idx++] += "0";
                 }
             }
@@ -208,8 +210,8 @@ void make_cls(string opt, int idx, int num)
         for (int r = r_start; r < r_start + n; r++) {
             for (int c = c_start; c < c_start + n; c++) {
                 if (G[r][c] == 0) {
-					cls[cls_idx] += to_string(r+1) + to_string(c+1) + to_string(num) + " ";
-					rc_ls[rc_ls_idx++] = to_string(r+1) + to_string(c+1);
+					cls[cls_idx] += to_string(r) + to_string(c) + to_string(num) + " ";
+					rc_ls[rc_ls_idx++] = to_string(r) + to_string(c);
                 }
             } 
         }
