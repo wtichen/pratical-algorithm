@@ -260,7 +260,6 @@ void make_bloc_cls(int idx, int num)
 void make_cell_cls(int r, int c)
 {
     // For each cell
-
     if (G[r][c] != 0) {
         cls[cls_idx++] = to_string(get_rcn_encode(r, c, G[r][c]-1)) + " 0";
     }

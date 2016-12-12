@@ -35,8 +35,8 @@ int main(int argc, char **argv)
     string out_fn = in_fn.substr(0, in_fn.find(".")) + ".sat";
     /* string out_fn = in_fn.substr(in_fn.find_last_of("/")+1, in_fn.find(".") - in_fn.find_last_of("/")) + "sat"; */
     
-    //parse_DIMACS_CNF(cls, X_max, in_fn.c_str());
-    parse_DIMACS_CNF(cls, X_max, "./benchmarks/SAT/sanity/sanity2.cnf");
+    parse_DIMACS_CNF(cls, X_max, in_fn.c_str());
+    /* parse_DIMACS_CNF(cls, X_max, "./benchmarks/SAT/sanity/sanity2.cnf"); */
     cls_size = cls.size();
 
 
@@ -47,7 +47,7 @@ int main(int argc, char **argv)
 
     init();
 
-    sol.open(out_fn, ios::out);
+    sol.open(out_fn.c_str(), ios::out);
     if (DPLL()) {
         sol << "s SATISFIABLE" << endl;
         sol << "v ";
