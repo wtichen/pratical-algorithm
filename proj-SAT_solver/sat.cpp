@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <iomanip>
 #include <vector>
 #include <string>
@@ -15,7 +16,7 @@ bool CheckSuccess();
 bool CheckFailure();
 bool CheckUnitClause();
 void BCP();
-void Init();
+void Init(string in_file);
 void AssignX(int index, int val, int c_idx);
 void UnassignX(int lvl);
 void UnAssignLitAtLevel(int lvl);
@@ -46,7 +47,7 @@ vector<vector<int> > pw;
 vector<vector<int> > nw;
 int x_num;
 
-string in_filename;
+string in_file;
 string out_filename;
 
 /* Mutable Variables */
@@ -65,51 +66,48 @@ int main(int argc, char **argv)
 {
 
     // TODO: Result should under same dir
-    in_filename  = argv[1];
-    /* in_filename = "./benchmarks/SAT/sanity/sanity2.cnf"; */
-    out_filename = "result.sat";
+    string in_fn(argv[1]);
+    string out_fn(in_fn.substr(0, in_fn.find_last_of("\.")) + ".sat");
+    /* cout << out_fn << endl; */
+    fstream out_fs(out_fn.c_str(), fstream::out);
 
     // Init
-    Init();
+    Init(in_fn);
 
-    cout << "x_num: " << x_num << endl;
+    /* cout << "x_num: " << x_num << endl; */
 
     while (true) {
+
+        // Local init
         cur_lvl = 0;
         back_lvl = -1;
+
+        // Result judgement
         bool res  = DPLL();
         if (!res && back_lvl == 0) {
-            UnAssignLitAtLevel(cur_lvl);
-            cout << "Need restrat" << endl;
+            /* cout << "Need restrat" << endl; */
             continue;
         }
         else if (res) {
-            cout << "Res: Has solution" << endl;
+            out_fs << "s SATISFIABLE" << endl;
+            out_fs << "v ";
             for (int i = 1; i <= x_num; i++) {
-                if (x_val[i] == 0) 
-                    cout << i*-1 << " ";
-                else
-                    cout << i << " ";
+                if (x_val[i] == 1) 
+                    out_fs << i << " ";
+                else 
+                    out_fs << i*-1 << " ";
+                
             }
+            out_fs.close();
             return 1;
         }
         else {
-            cout << "Res: GGGGGGGGGGGG" << endl;
+            out_fs << "s UNSATISFIABLE" << endl;
+            out_fs.close();
             return 0;
         }
+
     }
-
-    /* // DPLL */
-    /* // TODO: Write output to file */
-    /* if (DPLL()) { */
-    /*     cout << "Res: Has solution" << endl; */
-    /*     OutputX(); */
-    /* } */
-    /* else { */
-    /*     cout << "Res: GGGGGGGGGGGG" << endl; */
-    /* } */
-
-    return 0;
 }
 
 
@@ -124,10 +122,10 @@ bool DPLL()
         return true;
     }    
     if (CheckFailure()) {
-        cout << "FAIL" << endl;
+        /* cout << "FAIL" << endl; */
 
-        OutputAsgn();
-        OutputX();
+        /* OutputAsgn(); */
+        /* OutputX(); */
 
         if (cur_lvl != 0) 
             ConflictLearning(c_con_idx); 
@@ -142,10 +140,10 @@ bool DPLL()
     int val = 1;
 
     while (true) {
-        cout << " # DECIDE x" << idx << " as " << val << " dur " << cur_lvl << endl;
+        /* cout << " # DECIDE x" << idx << " as " << val << " dur " << cur_lvl << endl; */
         AssignX(idx, val, -1);
-        OutputAsgn();
-        OutputX();
+        /* OutputAsgn(); */
+        /* OutputX(); */
         if (DPLL()) {
             return true;
         }
@@ -161,7 +159,7 @@ bool DPLL()
             }
             else {
                 back_lvl = -1;
-                cout << "WILL ARRIVED" << endl;
+                /* cout << "WILL ARRIVED" << endl; */
                 /* val = (val == 0)? 1: 0; */
             }
         }
@@ -331,16 +329,16 @@ bool CheckUnitClause()
 
         // Unit clause
         if (second_lit == 0 && GetLitValue(first_lit) == -1) {
-            cout << "# IMPLY U x" << first_idx << " as " << !(first_lit < 0)  << " dur " << cur_lvl << endl;
+            /* cout << "# IMPLY U x" << first_idx << " as " << !(first_lit < 0)  << " dur " << cur_lvl << endl; */
             (first_lit < 0)? AssignX(first_idx, 0, c_idx): AssignX(first_idx, 1, c_idx);
             return true;
         }
 
         // First lit unassign
         if (GetLitValue(first_lit) == -1 && GetLitValue(second_lit) == 0 ) {
-            cout << "# IMPLY P x" << first_idx << " as " << !(first_lit < 0)  << " dur " << cur_lvl << endl;
-            cout << "[" << c_idx << "] ";
-            OutputVec(cls[c_idx]);
+            /* cout << "# IMPLY P x" << first_idx << " as " << !(first_lit < 0)  << " dur " << cur_lvl << endl; */
+            /* cout << "[" << c_idx << "] "; */
+            /* OutputVec(cls[c_idx]); */
             (first_lit < 0)? AssignX(first_idx, 0, c_idx): AssignX(first_idx, 1, c_idx);
             /* AssignX(first_lit, (first_lit > 0)); */
             return true;
@@ -348,9 +346,9 @@ bool CheckUnitClause()
 
         // Second lit unassign
         if (GetLitValue(first_lit) == 0  && GetLitValue(second_lit) == -1) {
-            cout << "# IMPLY P x" << second_idx <<" as " << !(second_lit < 0) << " dur " << cur_lvl  <<  endl;
-            cout << "[" << c_idx << "] ";
-            OutputVec(cls[c_idx]);
+            /* cout << "# IMPLY P x" << second_idx <<" as " << !(second_lit < 0) << " dur " << cur_lvl  <<  endl; */
+            /* cout << "[" << c_idx << "] "; */
+            /* OutputVec(cls[c_idx]); */
             (second_lit < 0)? AssignX(second_idx, 0, c_idx): AssignX(second_idx, 1, c_idx);
             /* AssignX(second_lit, (second_lit > 0)); */
             return true;
@@ -399,26 +397,16 @@ void BCP()
 void ConflictLearning(int c_idx) 
 {
     // Get firstUIP
-    if (cls.size() > 851) {
-        int first_lit  = _2lit[850][0];
-        int second_lit = _2lit[850][1];
-
-        for (int i = 0; i < cls[850].size(); i++) {
-            int lit = cls[850][i];
-            cout << lit << "(" << GetLitValue(lit) << ")" << " ";
-        }
-        cout << endl;
-    }
-    cout << "-----Conflict ";
-    OutputVec(cls[c_idx]);
+    /* cout << "-----Conflict "; */
+    /* OutputVec(cls[c_idx]); */
     vector<int> v = GetFirstUIP(c_idx);
 
     // Add new learning clause
     cls.push_back(v);
     _2lit.push_back(vector<int>(2));
-    OutputAsgn();
-    cout << "-----Learned c_idx " << cls.size()-1 << " ";
-    OutputVec(v);
+    /* OutputAsgn(); */
+    /* cout << "-----Learned c_idx " << cls.size()-1 << " "; */
+    /* OutputVec(v); */
     /* OutputCls(); */
 
     // Iterate
@@ -453,7 +441,7 @@ void ConflictLearning(int c_idx)
         }
         else {
             w_lit = lit;
-            cout << "Should imply " << w_lit << endl;
+            /* cout << "Should imply " << w_lit << endl; */
         }
     }
 
@@ -464,11 +452,11 @@ void ConflictLearning(int c_idx)
         _2lit.back()[1] = 0;
     }
     else {
-        cout << "Watch " << w_lit << " " << w_lit2 << endl;
+        /* cout << "Watch " << w_lit << " " << w_lit2 << endl; */
         _2lit.back()[0] = w_lit;
         _2lit.back()[1] = w_lit2;
     }
-    cout << "Shoud back to " << back_lvl << endl;
+    /* cout << "Shoud back to " << back_lvl << endl; */
 
     return;
 }
@@ -479,21 +467,18 @@ vector<int> GetFirstUIP(int c_idx)
     int cnt = 0;
     vector<int> v = cls[c_idx];
 
-    cout << "Clause----- ";
-    OutputVec(v);
+    /* cout << "Clause----- "; */
+    /* OutputVec(v); */
     while ((lit = GetClConflictStatus(v)) != -1) {
 
-        cout << "Resolve --- " << lit << endl;
+        /* cout << "Resolve --- " << lit << endl; */
         /* OutputVec(v); */
-        OutputVec(cls[GetLitAntecedent(lit)]);
+        /* OutputVec(cls[GetLitAntecedent(lit)]); */
 
         v = Resolve(v, cls[GetLitAntecedent(lit)], lit); 
 
-        /* if (++cnt == 50) */ 
-        /*     break; */
-
-        cout << "Roung " << cnt << " Get Clause----- ";
-        OutputVec(v);
+        /* cout << "Roung " << cnt << " Get Clause----- "; */
+        /* OutputVec(v); */
     }
 
     return v;
@@ -584,20 +569,7 @@ vector<int> Resolve(vector<int> c, vector<int> a, int lit)
         int t_lit = c[i];
         int t_idx = abs(t_lit);
         if (t_idx != idx) {
-            // For example lit = x1
-            // I.   find x1
-            // II.  fint -x1
-            // III. no x1
-            /* if (find(v.begin(), v.end(), t_lit) != v.end()) { */
-            /*     continue; */
-            /* } */
-            /* else if (find(v.begin(), v.end(), t_lit*-1) != v.end()) { */
-            /*     v.erase(remove(v.begin(), v.end(), t_lit*-1), v.end()); */
-
-            /* } */
-            /* else { */
-                v.push_back(t_lit); 
-            /* } */
+            v.push_back(t_lit); 
         } 
     }
 
@@ -606,16 +578,11 @@ vector<int> Resolve(vector<int> c, vector<int> a, int lit)
         int t_idx = abs(t_lit);
         if (t_idx != idx) {
             // For example lit = x1
-            // I.   find x1
-            // II.  fint -x1
-            // III. no x1
+            // I.  find x1
+            // II. no x1
             if (find(v.begin(), v.end(), t_lit) != v.end()) {
                 continue;
             }
-            /* else if (find(v.begin(), v.end(), t_lit*-1) != v.end()) { */
-            /*     v.erase(remove(v.begin(), v.end(), t_lit*-1), v.end()); */
-
-            /* } */
             else {
                 v.push_back(t_lit); 
             }
@@ -625,10 +592,10 @@ vector<int> Resolve(vector<int> c, vector<int> a, int lit)
     return v;
 }
 
-void Init()
+void Init(string in_file)
 {
     // Parse from source cnf file
-    parse_DIMACS_CNF(cls, x_num, in_filename.c_str());
+    parse_DIMACS_CNF(cls, x_num, in_file.c_str());
 
     // Watch first 2 literal for each clause
     _2lit.resize(cls.size(), vector<int>());
@@ -689,12 +656,6 @@ void OutputX()
         if (i % 10 == 0) 
             cout << endl;
     }
-
-    /* for (int i = 1; i <= x_num; i++) { */
-    /*     cout << setw(3) << x_val[i] << " "; */
-    /*     if (i % 10 == 0) */
-    /*         cout << endl; */
-    /* } */
 
     cout << endl;
 }

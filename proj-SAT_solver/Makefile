@@ -5,7 +5,7 @@
 -DDEBUG
 
 # Optimizing flags
-FLAGS=-Wall -Wold-style-cast -Wformat=2 -ansi -pedantic -O3 -g
+FLAGS=-Wall -Wold-style-cast -Wformat=2 -ansi -pedantic -O3
 
 # List all the .o files you need to build here
 OBJS=parser.o sat.o
@@ -16,11 +16,11 @@ EXENAME=yasat
 
 # Compile targets
 all: $(OBJS)
-	g++-4.9 $(FLAGS) $(OBJS) -lz -o $(EXENAME)
+	g++ $(FLAGS) $(OBJS) -lz -o $(EXENAME)
 parser.o: parser.cpp parser.h
-	g++-4.9 $(FLAGS) -c parser.cpp
+	g++ $(FLAGS) -c parser.cpp
 sat.o: sat.cpp parser.h
-	g++-4.9 $(FLAGS) -c sat.cpp
+	g++ $(FLAGS) -c sat.cpp
 
 # Add more compilation targets here
 
