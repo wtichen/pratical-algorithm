@@ -1,0 +1,12 @@
+0.4
+sunny
+sunny
+sunny
+sunny
+sunny
+sunny
+rainy
+rainy
+rainy
+rainy
+

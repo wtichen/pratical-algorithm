@@ -30,4 +30,4 @@ sat.o: sat.cpp parser.h
 # your object files and your executable.
 .PHONY: clean
 clean:
-	rm -rf $(OBJS) $(EXENAME)
+	rm -rf $(OBJS) $(EXENAME); find . -type f -name '*.sat' -delete

@@ -1,0 +1,12 @@
+10
+foggy,no
+foggy,no
+foggy,no
+rainy,yes
+sunny,no
+foggy,no
+rainy,yes
+rainy,yes
+foggy,no
+rainy,yes
+

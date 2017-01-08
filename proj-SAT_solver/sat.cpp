@@ -53,7 +53,6 @@ string out_filename;
 /* Mutable Variables */
 vector<int> x_val;
 vector<vector<int> > _2lit; 
-
 vector<vector<int> > _asgn;
 vector<vector<int> > _antc;
 bool is_backtracking;
