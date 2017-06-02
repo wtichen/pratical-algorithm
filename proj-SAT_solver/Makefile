@@ -16,11 +16,11 @@ EXENAME=yasat
 
 # Compile targets
 all: $(OBJS)
-	g++ $(FLAGS) $(OBJS) -lz -o $(EXENAME)
+	g++-6 $(FLAGS) $(OBJS) -lz -o $(EXENAME)
 parser.o: parser.cpp parser.h
-	g++ $(FLAGS) -c parser.cpp
+	g++-6 $(FLAGS) -c parser.cpp
 sat.o: sat.cpp parser.h
-	g++ $(FLAGS) -c sat.cpp
+	g++-6 $(FLAGS) -c sat.cpp
 
 # Add more compilation targets here
 
@@ -29,5 +29,10 @@ sat.o: sat.cpp parser.h
 # The "phony" `clean' compilation target.  Type `make clean' to remove
 # your object files and your executable.
 .PHONY: clean
+.PHONY: clean_sat
 clean:
-	rm -rf $(OBJS) $(EXENAME); find . -type f -name '*.sat' -delete
+	rm -rf $(OBJS) $(EXENAME);
+clean_sat:
+	find . -type f -name '*.sat' -delete
+
+
